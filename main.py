@@ -1,14 +1,18 @@
+import os
 import cv2
 import time
 from emailing import send_email
 import glob
+import cleanImageFolder
+from threading import Thread
 
-video = cv2.VideoCapture(0)
-time.sleep(2)
 
+cleanImageFolder.cleanImgFolder()
+
+video = cv2.VideoCapture(1)
+time.sleep(5)
 first_frame = None
 status_list = []
-
 count = 1
 while True:
     # read frame from VideoCapture
@@ -29,7 +33,7 @@ while True:
     # increase the size and thickness of the foreground image or to connect broken pieces of an object
     dil_thresh = cv2.dilate(src=thresh, kernel=None, iterations=2)
 
-    cv2.imshow("My Video", dil_thresh)
+    # cv2.imshow("My Video", dil_thresh)
 
     contours, hierarchy = cv2.findContours(image=dil_thresh, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_SIMPLE)
 
@@ -43,12 +47,12 @@ while True:
         rectangle = cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 3)
 
         if rectangle.any:
-            img = cv2.imwrite(f'images/{count}.jpg', frame)
+            img = cv2.imwrite(f'images/{count}.png', frame)
             count = count + 1
 
-            img_len = glob.glob("images/*jpg")
+            img_len = glob.glob("images/*png")
             index = int(len(img_len)/2)
-            obj_index = f'images/{index}.jpg'
+            obj_index = f'images/{index}.png'
             status = 1
 
     status_list.append(status)
@@ -57,9 +61,13 @@ while True:
     print(status_list)
 
     if status_list[0] == 1 and status_list[1] == 0:
-        send_email(obj_index)
+        print("Hello World")
+        email_thread = Thread(target=send_email, args=(obj_index, ))
+        email_thread.daemon = True
+        email_thread.start()
+        count = 1
 
-    # cv2.imshow("Object Detection", frame)
+    cv2.imshow("Object Detection", frame)
 
     key = cv2.waitKey(1)
 

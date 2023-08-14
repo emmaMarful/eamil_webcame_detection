@@ -1,7 +1,9 @@
+import glob
 import smtplib
 import imghdr
 from email.message import EmailMessage
 import logs as log
+import cleanImageFolder as cleanImg
 
 # logs is a py file, create your own logs with your email and password from the Google apps
 USERNAME = log.my_email()
@@ -13,7 +15,7 @@ def send_email(image_path):
     print("send_email function started")
     email_message = EmailMessage()
     email_message["Subject"] = "New Object detected!"
-    email_message.set_content("Hey we just detected a new object")
+    email_message.set_content("Hey we just detected a new object (python object detection program trial- openCV2) #ignore")
 
     with open(image_path, "rb") as file:
         content = file.read()
@@ -29,6 +31,9 @@ def send_email(image_path):
     gmail.quit()
     print("send_email function ended")
 
+    cleanImg.cleanImgFolder()
+    print("folder emptied")
+
 
 if __name__ == "__main__":
-    send_email(image_path="images/52.jpg")
+    send_email(image_path="images/52.png")
